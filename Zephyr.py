@@ -1,68 +1,50 @@
 import arcade
 import os
 
-SPRITE_SCALING = 2.0
-
+SPRITE_SCALING = 1.0
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
-
-MOVEMENT_SPEED = 5
-
+MOVEMENT_SPEED = 3
 
 class MyGame(arcade.Window):
-    """ Main application class. """
-
     def __init__(self, width, height):
-        """
-        Initializer
-        """
         super().__init__(width, height)
-
-        # Set the working directory (where we expect to find files) to the same
-        # directory this .py file is in. You can leave this out of your own
-        # code, but it is needed to easily run the examples using "python -m"
-        # as mentioned at the top of this program.
         file_path = os.path.dirname(os.path.abspath(__file__))
         os.chdir(file_path)
 
-        # Sprite lists
         self.all_sprites_list = None
         self.coin_list = None
 
-        # Set up the player
         self.score = 0
         self.player_sprite = None
         self.wall_list = None
         self.physics_engine = None
 
     def setup(self):
-        """ Set up the game and initialize the variables. """
-
-        # Sprite lists
+        print("SETUP")
         self.all_sprites_list = arcade.SpriteList()
         self.wall_list = arcade.SpriteList()
 
-        # Set up the player
         self.score = 0
         self.player_sprite = arcade.Sprite("tiger.png",
-                                           SPRITE_SCALING)
-        self.player_sprite.center_x = 50
+                                           SPRITE_SCALING/2)
+        self.player_sprite.center_x = 64
         self.player_sprite.center_y = 64
         self.all_sprites_list.append(self.player_sprite)
 
         # -- Set up the walls
         # Create a row of boxes
-        for x in range(173, 650, 64):
+        for x in range(128, 256+32, 32):
             wall = arcade.Sprite("brick.jpg", SPRITE_SCALING)
             wall.center_x = x
-            wall.center_y = 200
+            wall.center_y = 256
             self.all_sprites_list.append(wall)
             self.wall_list.append(wall)
 
         # Create a column of boxes
-        for y in range(273, 500, 64):
+        for y in range(128, 256, 32):
             wall = arcade.Sprite("brick.jpg", SPRITE_SCALING)
-            wall.center_x = 465
+            wall.center_x = 256
             wall.center_y = y
             self.all_sprites_list.append(wall)
             self.wall_list.append(wall)
@@ -74,6 +56,7 @@ class MyGame(arcade.Window):
         arcade.set_background_color(arcade.color.AMAZON)
 
     def on_draw(self):
+        print("DRAW")
         """
         Render the screen.
         """
@@ -89,21 +72,50 @@ class MyGame(arcade.Window):
         """Called whenever a key is pressed. """
 
         if key == arcade.key.UP:
-            self.player_sprite.change_y = MOVEMENT_SPEED
-        elif key == arcade.key.DOWN:
-            self.player_sprite.change_y = -MOVEMENT_SPEED
-        elif key == arcade.key.LEFT:
-            self.player_sprite.change_x = -MOVEMENT_SPEED
-        elif key == arcade.key.RIGHT:
-            self.player_sprite.change_x = MOVEMENT_SPEED
+            print("UP")
+            i = 0
+            while i < len(self.wall_list):
+                i += 1
+            #self.player_sprite.change_y = MOVEMENT_SPEED
+        if key == arcade.key.DOWN:
+            print("DOWN")
+            i = 0
+            while i < len(self.wall_list):
+                self.wall_list[i].change_y = -MOVEMENT_SPEED
+                i += 1
+            #self.player_sprite.change_y = -MOVEMENT_SPEED
+        if key == arcade.key.LEFT:
+            print("LEFT")
+            i = 0
+            while i < len(self.wall_list):
+                self.wall_list[i].change_x = -MOVEMENT_SPEED
+                i += 1
+            #self.player_sprite.change_x = -MOVEMENT_SPEED
+        if key == arcade.key.RIGHT:
+            print("RIGHT")
+            i = 0
+            while i < len(self.wall_list):
+                self.wall_list[i].change_x = MOVEMENT_SPEED
+                i += 1
+            #self.player_sprite.change_x = MOVEMENT_SPEED
 
     def on_key_release(self, key, modifiers):
         """Called when the user releases a key. """
 
         if key == arcade.key.UP or key == arcade.key.DOWN:
-            self.player_sprite.change_y = 0
-        elif key == arcade.key.LEFT or key == arcade.key.RIGHT:
-            self.player_sprite.change_x = 0
+            #self.player_sprite.change_y = 0
+            print("UP OR DOWN")
+            i = 0
+            while i < len(self.wall_list):
+                self.wall_list[i].change_y = 0
+                i += 1
+        if key == arcade.key.LEFT or key == arcade.key.RIGHT:
+            #self.player_sprite.change_x = 0
+            print("LEFT OR RIGHT")
+            i = 0
+            while i < len(self.wall_list):
+                self.wall_list[i].change_x = 0
+                i += 1
 
     def update(self, delta_time):
         """ Movement and game logic """
