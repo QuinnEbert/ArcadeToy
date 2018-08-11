@@ -1,18 +1,22 @@
 import arcade
 import os
 
-SPRITE_SCALING = 2.0
+SPRITE_SCALING = 1.0
 
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 
 MOVEMENT_SPEED = 5
 
+KEYS_DOWN = []
+
+CHEESE_BLOCK = "cheese.png"
 
 class MyGame(arcade.Window):
     """ Main application class. """
 
     def __init__(self, width, height):
+        self.lpy = 0.0
         """
         Initializer
         """
@@ -35,8 +39,18 @@ class MyGame(arcade.Window):
         self.wall_list = None
         self.physics_engine = None
 
+        self.mapdata = []
+
+        # Viewport
+        self.vpx = 0
+        self.vpy = 0
+
+        self.cheese = None
+
     def setup(self):
         """ Set up the game and initialize the variables. """
+
+        self.cheese = None
 
         # Sprite lists
         self.all_sprites_list = arcade.SpriteList()
@@ -46,32 +60,58 @@ class MyGame(arcade.Window):
         self.score = 0
         self.player_sprite = arcade.Sprite("tiger.png",
                                            SPRITE_SCALING)
-        self.player_sprite.center_x = 50
-        self.player_sprite.center_y = 64
-        self.all_sprites_list.append(self.player_sprite)
+        self.player_sprite.center_x = 32
+        self.player_sprite.center_y = -32
 
-        # -- Set up the walls
-        # Create a row of boxes
-        for x in range(173, 650, 64):
-            wall = arcade.Sprite("brick.jpg", SPRITE_SCALING)
-            wall.center_x = x
-            wall.center_y = 200
-            self.all_sprites_list.append(wall)
-            self.wall_list.append(wall)
+        # Viewport
+        self.vpx = 0
+        self.vpy = 0
 
-        # Create a column of boxes
-        for y in range(273, 500, 64):
-            wall = arcade.Sprite("brick.jpg", SPRITE_SCALING)
-            wall.center_x = 465
-            wall.center_y = y
-            self.all_sprites_list.append(wall)
-            self.wall_list.append(wall)
+        self.blocks = {
+            10: "NO_BLOCK.jpg",
+            11: "brick.jpg",
+            12: CHEESE_BLOCK,
+            13: "rubble.jpg",
+            14: "firepit.jpg"
+        }
+
+        self.mapdata = [
+            [11,11,11,11,14,11,11,11,11,11,11,11,11],
+            [11,10,13,13,10,10,10,10,10,10,10,10,12],
+            [11,10,13,10,10,10,10,10,10,10,10,10,11],
+            [11,10,10,10,10,10,10,10,10,10,10,10,11],
+            [11,10,10,10,10,10,10,10,10,10,10,10,11],
+            [11,10,10,10,10,10,10,10,10,10,10,10,11],
+            [11,11,11,11,11,11,11,11,11,11,11,11,11]
+        ]
+
+        y = 0
+        while y < len(self.mapdata):
+            x = 0
+            while x < len(self.mapdata[y]):
+                block_id = self.mapdata[y][x]
+                block_name = self.blocks[block_id]
+                wall = arcade.Sprite(block_name, SPRITE_SCALING)
+                wall.center_x = x*32
+                wall.center_y = -(y*32)
+                self.all_sprites_list.append(wall)
+                if not block_name == CHEESE_BLOCK and not block_id == 10:
+                    self.wall_list.append(wall)
+                else:
+                    if block_name == CHEESE_BLOCK:
+                        self.cheese = wall
+                x += 1
+            y += 1
+
 
         self.physics_engine = arcade.PhysicsEngineSimple(self.player_sprite,
                                                          self.wall_list)
 
         # Set the background color
         arcade.set_background_color(arcade.color.AMAZON)
+
+        self.all_sprites_list.append(self.player_sprite)
+
 
     def on_draw(self):
         """
@@ -81,35 +121,76 @@ class MyGame(arcade.Window):
         # This command has to happen before we start drawing
         arcade.start_render()
 
+        self.vpx = self.player_sprite.get_position()[0]-(SCREEN_WIDTH/2)
+        self.vpy = self.player_sprite.get_position()[1]-(SCREEN_HEIGHT/2)
+
+        arcade.set_viewport(self.vpx, self.vpx+SCREEN_WIDTH, self.vpy, self.vpy+SCREEN_HEIGHT)
+
         # Draw all the sprites.
-        self.wall_list.draw()
-        self.player_sprite.draw()
+        self.all_sprites_list.draw()
+        #self.player_sprite.draw()
+
+        output = f"Centre: {self.vpx}, {self.vpy}"
+        arcade.draw_text(output, self.vpx+10, self.vpy+SCREEN_HEIGHT-20, arcade.color.WHITE, 14)
 
     def on_key_press(self, key, modifiers):
         """Called whenever a key is pressed. """
 
-        if key == arcade.key.UP:
-            self.player_sprite.change_y = MOVEMENT_SPEED
-        elif key == arcade.key.DOWN:
-            self.player_sprite.change_y = -MOVEMENT_SPEED
-        elif key == arcade.key.LEFT:
-            self.player_sprite.change_x = -MOVEMENT_SPEED
-        elif key == arcade.key.RIGHT:
-            self.player_sprite.change_x = MOVEMENT_SPEED
+        #if key == arcade.key.UP:
+        #    self.player_sprite.change_y = MOVEMENT_SPEED
+        #elif key == arcade.key.DOWN:
+        #    self.player_sprite.change_y = -MOVEMENT_SPEED
+        #elif key == arcade.key.LEFT:
+        #    self.player_sprite.change_x = -MOVEMENT_SPEED
+        #elif key == arcade.key.RIGHT:
+        #    self.player_sprite.change_x = MOVEMENT_SPEED
+
+        if not key in KEYS_DOWN:
+            KEYS_DOWN.append(key)
 
     def on_key_release(self, key, modifiers):
         """Called when the user releases a key. """
 
-        if key == arcade.key.UP or key == arcade.key.DOWN:
-            self.player_sprite.change_y = 0
-        elif key == arcade.key.LEFT or key == arcade.key.RIGHT:
-            self.player_sprite.change_x = 0
+        #if key == arcade.key.UP or key == arcade.key.DOWN:
+        #    self.player_sprite.change_y = 0
+        #elif key == arcade.key.LEFT or key == arcade.key.RIGHT:
+        #    self.player_sprite.change_x = 0
+
+        if key in KEYS_DOWN:
+            KEYS_DOWN.remove(key)
 
     def update(self, delta_time):
         """ Movement and game logic """
-
         # Call update on all sprites (The sprites don't do much in this
         # example though.)
+
+        self.player_sprite.change_x = 0
+        self.player_sprite.change_y = 0
+        if arcade.key.LEFT in KEYS_DOWN:
+            if not arcade.key.RIGHT in KEYS_DOWN:
+                self.player_sprite.change_x = -MOVEMENT_SPEED
+        if arcade.key.RIGHT in KEYS_DOWN:
+            if not arcade.key.LEFT in KEYS_DOWN:
+                self.player_sprite.change_x = MOVEMENT_SPEED
+        if arcade.key.LEFT in KEYS_DOWN and arcade.key.RIGHT in KEYS_DOWN:
+            self.player_sprite.change_x = 0
+        if arcade.key.UP in KEYS_DOWN:
+            if not arcade.key.DOWN in KEYS_DOWN:
+                self.player_sprite.change_y = MOVEMENT_SPEED
+        if arcade.key.DOWN in KEYS_DOWN:
+            if not arcade.key.UP in KEYS_DOWN:
+                self.player_sprite.change_y = -MOVEMENT_SPEED
+        if arcade.key.UP in KEYS_DOWN and arcade.key.DOWN in KEYS_DOWN:
+            self.player_sprite.change_y = 0
+
+        colres = arcade.geometry.check_for_collision(self.player_sprite, self.cheese)
+        if colres:
+            print("I like cheese!")
+            try:
+                self.all_sprites_list.remove(self.cheese)
+            except ValueError:
+                print("The cheese is gone!")
+
         self.physics_engine.update()
 
 
