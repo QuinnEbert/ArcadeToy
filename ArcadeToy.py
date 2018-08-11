@@ -23,24 +23,34 @@ KEY_W = 119
 KEY_S = 115
 KEY_A = 97
 KEY_D = 100
+KEY_R = 114
 KEYS_HELD = []
 
 class MyGame(arcade.Window):
     tiger_posx = 64
-    tiger_posy = 64
+    tiger_posy = 96
+    score = 0
     tiger = None
     cheese = None
 
     def __init__(self, width, height):
         super().__init__(width, height)
-
         arcade.set_background_color(arcade.color.BLACK)
+        self.reload()
+
+    def reload(self):
+        self.tiger_posx = 64
+        self.tiger_posy = 96
+        self.score = 0
 
     def on_key_press(self, key, modifiers):
         if key == KEY_Q:
             sys.exit(0)
-        if not key in KEYS_HELD:
-            KEYS_HELD.append(key)
+        if key == KEY_R and self.score:
+            self.reload()
+        else:
+            if not key in KEYS_HELD:
+                KEYS_HELD.append(key)
     def on_key_release(self, key, modifiers):
         if key in KEYS_HELD:
             KEYS_HELD.remove(key)
@@ -52,14 +62,20 @@ class MyGame(arcade.Window):
     def on_draw(self):
         """ Render the screen. """
         arcade.start_render()
-        SPRITE_SCALING_CHEESE = 0.3
-        self.cheese = arcade.Sprite("cheese.png", SPRITE_SCALING_CHEESE)
-        self.cheese.set_position(300, 300)
-        self.cheese.draw()
+        if not self.score:
+            SPRITE_SCALING_CHEESE = 0.3
+            self.cheese = arcade.Sprite("cheese.png", SPRITE_SCALING_CHEESE)
+            self.cheese.set_position(300, 300)
+            self.cheese.draw()
         SPRITE_SCALING_TIGER = 1.0
         self.tiger = arcade.Sprite("tiger.png", SPRITE_SCALING_TIGER)
         self.tiger.set_position(self.tiger_posx, self.tiger_posy)
         self.tiger.draw()
+        output = f"Score: {self.score}"
+        arcade.draw_text(output, 10, 25, arcade.color.WHITE, 14)
+        if self.score:
+            output = f"You win!  Press Q to exit or R to replay"
+            arcade.draw_text(output, 10, 10, arcade.color.WHITE, 14)
 
 
     def update(self, delta_time):
@@ -78,8 +94,8 @@ class MyGame(arcade.Window):
             self.tiger.draw()
             colres = arcade.geometry.check_for_collision(self.tiger, self.cheese)
             if colres:
-                print("You win!")
-                sys.exit(0)
+                if self.score == 0:
+                    self.score = 1
         except AttributeError:
             # This is a cheap hack for a failure that only happens on the first
             # frame...
