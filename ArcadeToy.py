@@ -32,9 +32,10 @@ class MyGame(arcade.Window):
     tiger_posy = SCREEN_HEIGHT / 2
     score = 0
     tiger = None
-    cheese = None
+    cheeses = {}
     viewport_offset_x = 0
     viewport_offset_y = 0
+    found_cheeses = []
 
     def __init__(self, width, height):
         super().__init__(width, height)
@@ -47,6 +48,7 @@ class MyGame(arcade.Window):
         self.tiger_posx = SCREEN_WIDTH / 2
         self.tiger_posy = SCREEN_HEIGHT / 2
         self.score = 0
+        self.found_cheeses = []
 
     def on_key_press(self, key, modifiers):
         if key == KEY_Q:
@@ -67,11 +69,19 @@ class MyGame(arcade.Window):
     def on_draw(self):
         """ Render the screen. """
         arcade.start_render()
-        if not self.score:
-            SPRITE_SCALING_CHEESE = 0.3
-            self.cheese = arcade.Sprite("cheese.png", SPRITE_SCALING_CHEESE)
-            self.cheese.set_position(300+self.viewport_offset_x, 300+self.viewport_offset_y)
-            self.cheese.draw()
+        SPRITE_SCALING_CHEESE = 0.3
+        if not 0 in self.found_cheeses:
+            self.cheeses[0] = arcade.Sprite("cheese.png", SPRITE_SCALING_CHEESE)
+            self.cheeses[0].set_position(150+self.viewport_offset_x, 150+self.viewport_offset_y)
+            self.cheeses[0].draw()
+        if not 1 in self.found_cheeses:
+            self.cheeses[1] = arcade.Sprite("cheese.png", SPRITE_SCALING_CHEESE)
+            self.cheeses[1].set_position((0-150)+self.viewport_offset_x, 150+self.viewport_offset_y)
+            self.cheeses[1].draw()
+        if not 2 in self.found_cheeses:
+            self.cheeses[2] = arcade.Sprite("cheese.png", SPRITE_SCALING_CHEESE)
+            self.cheeses[2].set_position((0-150)+self.viewport_offset_x, (0-150)+self.viewport_offset_y)
+            self.cheeses[2].draw()
         SPRITE_SCALING_TIGER = 1.0
         self.tiger = arcade.Sprite("tiger.png", SPRITE_SCALING_TIGER)
         self.tiger.set_position(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
@@ -80,7 +90,7 @@ class MyGame(arcade.Window):
         arcade.draw_text(output, 10, 40, arcade.color.WHITE, 14)
         output = f"Score: {self.score}"
         arcade.draw_text(output, 10, 25, arcade.color.WHITE, 14)
-        if self.score:
+        if self.score == 3:
             output = f"You win!  Press Q to exit or R to replay"
             arcade.draw_text(output, 10, 10, arcade.color.WHITE, 14)
 
@@ -103,12 +113,17 @@ class MyGame(arcade.Window):
         try:
             self.tiger.set_position(self.tiger_posx, self.tiger_posy)
             self.tiger.draw()
-            colres = arcade.geometry.check_for_collision(self.tiger, self.cheese)
-            if colres:
-                if self.score == 0:
-                    self.score = 1
-
-                    pygame.mixer.music.play()
+            i = 0
+            while i < len(self.cheeses):
+                if not i in self.found_cheeses:
+                    colres = arcade.geometry.check_for_collision(self.tiger, self.cheeses[i])
+                    if colres:
+                        if not i in self.found_cheeses:
+                            self.found_cheeses.append(i)
+                        self.score += 1
+                        if self.score == 3:
+                            pygame.mixer.music.play()
+                i += 1
         except AttributeError:
             # This is a cheap hack for a failure that only happens on the first
             # frame...
