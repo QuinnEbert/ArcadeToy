@@ -27,11 +27,13 @@ KEY_R = 114
 KEYS_HELD = []
 
 class MyGame(arcade.Window):
-    tiger_posx = 64
-    tiger_posy = 96
+    tiger_posx = SCREEN_WIDTH / 2
+    tiger_posy = SCREEN_HEIGHT / 2
     score = 0
     tiger = None
     cheese = None
+    viewport_offset_x = 0
+    viewport_offset_y = 0
 
     def __init__(self, width, height):
         super().__init__(width, height)
@@ -39,8 +41,8 @@ class MyGame(arcade.Window):
         self.reload()
 
     def reload(self):
-        self.tiger_posx = 64
-        self.tiger_posy = 96
+        self.tiger_posx = SCREEN_WIDTH / 2
+        self.tiger_posy = SCREEN_HEIGHT / 2
         self.score = 0
 
     def on_key_press(self, key, modifiers):
@@ -65,12 +67,14 @@ class MyGame(arcade.Window):
         if not self.score:
             SPRITE_SCALING_CHEESE = 0.3
             self.cheese = arcade.Sprite("cheese.png", SPRITE_SCALING_CHEESE)
-            self.cheese.set_position(300, 300)
+            self.cheese.set_position(300+self.viewport_offset_x, 300+self.viewport_offset_y)
             self.cheese.draw()
         SPRITE_SCALING_TIGER = 1.0
         self.tiger = arcade.Sprite("tiger.png", SPRITE_SCALING_TIGER)
-        self.tiger.set_position(self.tiger_posx, self.tiger_posy)
+        self.tiger.set_position(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
         self.tiger.draw()
+        output = f"View: {self.viewport_offset_x}, {self.viewport_offset_y}"
+        arcade.draw_text(output, 10, 40, arcade.color.WHITE, 14)
         output = f"Score: {self.score}"
         arcade.draw_text(output, 10, 25, arcade.color.WHITE, 14)
         if self.score:
@@ -82,13 +86,17 @@ class MyGame(arcade.Window):
         """ All the logic to move, and the game logic goes here. """
         for key in KEYS_HELD:
             if key == KEY_W:
-                self.tiger_posy += 4
+                #self.tiger_posy += 4
+                self.viewport_offset_y -= 2
             if key == KEY_S:
-                self.tiger_posy -= 4
+                #self.tiger_posy -= 4
+                self.viewport_offset_y += 2
             if key == KEY_A:
-                self.tiger_posx -= 4
+                #self.tiger_posx -= 4
+                self.viewport_offset_x += 2
             if key == KEY_D:
-                self.tiger_posx += 4
+                #self.tiger_posx += 4
+                self.viewport_offset_x -= 2
         try:
             self.tiger.set_position(self.tiger_posx, self.tiger_posy)
             self.tiger.draw()
