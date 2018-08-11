@@ -1,5 +1,6 @@
 import arcade
 import sys
+import pygame
 
 SCREEN_WIDTH = 512
 SCREEN_HEIGHT = 384
@@ -37,6 +38,8 @@ class MyGame(arcade.Window):
 
     def __init__(self, width, height):
         super().__init__(width, height)
+        pygame.mixer.init()
+        pygame.mixer.music.load("C:\\Windows\\Media\\tada.wav")
         arcade.set_background_color(arcade.color.BLACK)
         self.reload()
 
@@ -104,6 +107,8 @@ class MyGame(arcade.Window):
             if colres:
                 if self.score == 0:
                     self.score = 1
+
+                    pygame.mixer.music.play()
         except AttributeError:
             # This is a cheap hack for a failure that only happens on the first
             # frame...
