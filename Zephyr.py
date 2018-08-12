@@ -94,7 +94,7 @@ class MyGame(arcade.Window):
                 wall.center_x = x*32
                 wall.center_y = -(y*32)
                 self.all_sprites_list.append(wall)
-                if not block_name == CHEESE_BLOCK and not block_id == 10:
+                if not block_name == CHEESE_BLOCK and not block_id == 10 and not block_id >= 50:
                     self.wall_list.append(wall)
                 else:
                     if block_name == CHEESE_BLOCK:
