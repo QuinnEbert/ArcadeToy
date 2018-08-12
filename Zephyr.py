@@ -1,6 +1,8 @@
 import arcade
 import os
 import pygame
+import datetime
+import sys
 
 SPRITE_SCALING = 1.0
 
@@ -42,12 +44,31 @@ class MyGame(arcade.Window):
         self.footsteps = pygame.mixer.Sound("walking.wav")
         self.ate_cheese = False
         self.dialogue = f""
-        
+        self.lst = datetime.datetime.now()
+        self.immobile = False
+
     def common_reset(self):
         pygame.mixer.music.stop()
         self.ate_cheese = False
+        self.lst = datetime.datetime.now()
+        self.immobile = False
 
-    def map01(self):
+    def mapXX_ticks(self,map="01"):
+        ##
+        ## LEVEL SCRIPTING
+        ##
+        sst = (datetime.datetime.now()-self.lst).seconds
+        if map == "01":
+            if sst <= 9:
+                self.immobile = True
+            if sst >= 1 and sst <= 4:
+                self.dialogue = f"Holy hell!  What just happened?"
+            elif sst >= 6 and sst <= 9:
+                self.dialogue = f"I need to go find Christian and Regina!"
+            else:
+                self.dialogue = f""
+
+    def map01_setup(self):
         # Reset
         self.common_reset()
         # Music
@@ -107,10 +128,7 @@ class MyGame(arcade.Window):
         arcade.set_background_color(arcade.color.AMAZON)
         # the player needs to always be the top tile
         self.all_sprites_list.append(self.player_sprite)
-        ##
-        ## LEVEL SCRIPTING
-        ##
-        self.dialogue = f"Holy hell!  What just happened?"
+
     def setup(self):
         """ Set up the game and initialize the variables. """
 
@@ -129,7 +147,7 @@ class MyGame(arcade.Window):
         self.vpx = 0
         self.vpy = 0
 
-        self.map01()
+        self.map01_setup()
 
 
     def on_draw(self):
@@ -153,6 +171,9 @@ class MyGame(arcade.Window):
         arcade.draw_text(self.dialogue, self.vpx+10, self.vpy+10, arcade.color.WHITE, 14)
 
     def on_key_press(self, key, modifiers):
+        if self.immobile:
+            return
+
         """Called whenever a key is pressed. """
 
         #if key == arcade.key.UP:
@@ -178,6 +199,12 @@ class MyGame(arcade.Window):
 
 
     def on_key_release(self, key, modifiers):
+        if key == arcade.key.Q:
+            sys.exit(0)
+
+        if self.immobile:
+            return
+
         """Called when the user releases a key. """
 
         #if key == arcade.key.UP or key == arcade.key.DOWN:
@@ -228,6 +255,7 @@ class MyGame(arcade.Window):
 
         self.physics_engine.update()
 
+        self.mapXX_ticks()
 
 def main():
     """ Main method """
