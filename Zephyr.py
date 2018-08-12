@@ -6,8 +6,8 @@ import sys
 
 SPRITE_SCALING = 1.0
 
-SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 600
+SCREEN_WIDTH = 1360
+SCREEN_HEIGHT = 768
 
 MOVEMENT_SPEED = 5
 
@@ -27,7 +27,7 @@ class MyGame(arcade.Window):
 
     def __init__(self, width, height):
         self.lpy = 0.0
-        super().__init__(width, height)
+        super().__init__(width, height, fullscreen=True)
         file_path = os.path.dirname(os.path.abspath(__file__))
         os.chdir(file_path)
         self.all_sprites_list = None
@@ -64,6 +64,8 @@ class MyGame(arcade.Window):
                 self.dialogue = f"Holy hell!  What just happened?"
             elif sst >= 6 and sst <= 9:
                 self.dialogue = f"I need to go find Christian and Regina!"
+            elif sst >= 11 and sst <= 14:
+                self.dialogue = f"GAMEPLAY TIP: Press the Q key if you need to quit playing"
             else:
                 self.dialogue = f""
 
