@@ -1,5 +1,6 @@
 import arcade
 import os
+import pygame
 
 SPRITE_SCALING = 1.0
 
@@ -11,6 +12,13 @@ MOVEMENT_SPEED = 5
 KEYS_DOWN = []
 
 CHEESE_BLOCK = "cheese.png"
+
+MOVEMENT_KEYS = [
+    arcade.key.UP,
+    arcade.key.DOWN,
+    arcade.key.LEFT,
+    arcade.key.RIGHT
+]
 
 class MyGame(arcade.Window):
     """ Main application class. """
@@ -47,6 +55,58 @@ class MyGame(arcade.Window):
 
         self.cheese = None
 
+        # pygame (holy shit this is stupid...)
+        pygame.mixer.init()
+        self.footsteps = pygame.mixer.Sound("walking.wav")
+        self.ate_cheese = False
+
+    def common_reset(self):
+        pygame.mixer.music.stop()
+        self.ate_cheese = False
+
+    def map01(self):
+        self.common_reset()
+        pygame.mixer.music.load("al_toe.ogg")
+        pygame.mixer.music.play(loops=-1)
+        self.blocks = {
+            10: "NO_BLOCK.jpg",
+            11: "brick.jpg",
+            12: CHEESE_BLOCK,
+            13: "rubble.jpg",
+            14: "firepit.jpg"
+        }
+        self.mapdata = [
+            [11,11,11,11,14,11,11,11,11,11,11,11,11],
+            [11,10,13,13,10,10,10,10,10,10,10,10,12],
+            [11,10,13,10,10,10,10,10,10,10,10,10,11],
+            [11,10,10,10,10,10,10,10,10,10,10,10,11],
+            [11,10,10,10,10,10,10,10,10,10,10,10,11],
+            [11,10,10,10,10,10,10,10,10,10,10,10,11],
+            [11,11,11,11,11,11,11,11,11,11,11,11,11]
+        ]
+        y = 0
+        while y < len(self.mapdata):
+            x = 0
+            while x < len(self.mapdata[y]):
+                block_id = self.mapdata[y][x]
+                block_name = self.blocks[block_id]
+                wall = arcade.Sprite(block_name, SPRITE_SCALING)
+                wall.center_x = x*32
+                wall.center_y = -(y*32)
+                self.all_sprites_list.append(wall)
+                if not block_name == CHEESE_BLOCK and not block_id == 10:
+                    self.wall_list.append(wall)
+                else:
+                    if block_name == CHEESE_BLOCK:
+                        print("Wedgie!")
+                        self.cheese = wall
+                x += 1
+            y += 1
+        self.physics_engine = arcade.PhysicsEngineSimple(self.player_sprite,
+                                                         self.wall_list)
+        arcade.set_background_color(arcade.color.AMAZON)
+        self.all_sprites_list.append(self.player_sprite)
+
     def setup(self):
         """ Set up the game and initialize the variables. """
 
@@ -67,50 +127,7 @@ class MyGame(arcade.Window):
         self.vpx = 0
         self.vpy = 0
 
-        self.blocks = {
-            10: "NO_BLOCK.jpg",
-            11: "brick.jpg",
-            12: CHEESE_BLOCK,
-            13: "rubble.jpg",
-            14: "firepit.jpg"
-        }
-
-        self.mapdata = [
-            [11,11,11,11,14,11,11,11,11,11,11,11,11],
-            [11,10,13,13,10,10,10,10,10,10,10,10,12],
-            [11,10,13,10,10,10,10,10,10,10,10,10,11],
-            [11,10,10,10,10,10,10,10,10,10,10,10,11],
-            [11,10,10,10,10,10,10,10,10,10,10,10,11],
-            [11,10,10,10,10,10,10,10,10,10,10,10,11],
-            [11,11,11,11,11,11,11,11,11,11,11,11,11]
-        ]
-
-        y = 0
-        while y < len(self.mapdata):
-            x = 0
-            while x < len(self.mapdata[y]):
-                block_id = self.mapdata[y][x]
-                block_name = self.blocks[block_id]
-                wall = arcade.Sprite(block_name, SPRITE_SCALING)
-                wall.center_x = x*32
-                wall.center_y = -(y*32)
-                self.all_sprites_list.append(wall)
-                if not block_name == CHEESE_BLOCK and not block_id == 10:
-                    self.wall_list.append(wall)
-                else:
-                    if block_name == CHEESE_BLOCK:
-                        self.cheese = wall
-                x += 1
-            y += 1
-
-
-        self.physics_engine = arcade.PhysicsEngineSimple(self.player_sprite,
-                                                         self.wall_list)
-
-        # Set the background color
-        arcade.set_background_color(arcade.color.AMAZON)
-
-        self.all_sprites_list.append(self.player_sprite)
+        self.map01()
 
 
     def on_draw(self):
@@ -130,8 +147,8 @@ class MyGame(arcade.Window):
         self.all_sprites_list.draw()
         #self.player_sprite.draw()
 
-        output = f"Centre: {self.vpx}, {self.vpy}"
-        arcade.draw_text(output, self.vpx+10, self.vpy+SCREEN_HEIGHT-20, arcade.color.WHITE, 14)
+        #output = f"Centre: {self.vpx}, {self.vpy}"
+        #arcade.draw_text(output, self.vpx+10, self.vpy+SCREEN_HEIGHT-20, arcade.color.WHITE, 14)
 
     def on_key_press(self, key, modifiers):
         """Called whenever a key is pressed. """
@@ -145,8 +162,17 @@ class MyGame(arcade.Window):
         #elif key == arcade.key.RIGHT:
         #    self.player_sprite.change_x = MOVEMENT_SPEED
 
+        start_footsteps = True
+        if key in MOVEMENT_KEYS:
+            for tkey in KEYS_DOWN:
+                if tkey in MOVEMENT_KEYS:
+                    start_footsteps = False
+        if start_footsteps:
+            self.footsteps.play(loops=-1)
+
         if not key in KEYS_DOWN:
             KEYS_DOWN.append(key)
+
 
     def on_key_release(self, key, modifiers):
         """Called when the user releases a key. """
@@ -158,6 +184,14 @@ class MyGame(arcade.Window):
 
         if key in KEYS_DOWN:
             KEYS_DOWN.remove(key)
+
+        stop_footsteps = True
+        if key in MOVEMENT_KEYS:
+            for tkey in KEYS_DOWN:
+                if tkey in MOVEMENT_KEYS:
+                    stop_footsteps = False
+        if stop_footsteps:
+            self.footsteps.stop()
 
     def update(self, delta_time):
         """ Movement and game logic """
@@ -183,13 +217,11 @@ class MyGame(arcade.Window):
         if arcade.key.UP in KEYS_DOWN and arcade.key.DOWN in KEYS_DOWN:
             self.player_sprite.change_y = 0
 
-        colres = arcade.geometry.check_for_collision(self.player_sprite, self.cheese)
-        if colres:
-            print("I like cheese!")
-            try:
-                self.all_sprites_list.remove(self.cheese)
-            except ValueError:
-                print("The cheese is gone!")
+        if not self.ate_cheese:
+            colres = arcade.geometry.check_for_collision(self.player_sprite, self.cheese)
+            if colres:
+                self.ate_cheese = True
+                self.cheese.kill()
 
         self.physics_engine.update()
 
