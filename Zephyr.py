@@ -162,8 +162,9 @@ class MyGame(arcade.Window):
         #elif key == arcade.key.RIGHT:
         #    self.player_sprite.change_x = MOVEMENT_SPEED
 
-        start_footsteps = True
+        start_footsteps = False
         if key in MOVEMENT_KEYS:
+            start_footsteps = True
             for tkey in KEYS_DOWN:
                 if tkey in MOVEMENT_KEYS:
                     start_footsteps = False
