@@ -42,7 +42,7 @@ class MyGame(arcade.Window):
         self.footsteps = pygame.mixer.Sound("walking.wav")
         self.ate_cheese = False
         self.dialogue = f""
-
+        
     def common_reset(self):
         pygame.mixer.music.stop()
         self.ate_cheese = False
@@ -110,7 +110,7 @@ class MyGame(arcade.Window):
         ##
         ## LEVEL SCRIPTING
         ##
-
+        self.dialogue = f"Holy hell!  What just happened?"
     def setup(self):
         """ Set up the game and initialize the variables. """
 
@@ -150,7 +150,7 @@ class MyGame(arcade.Window):
         #self.player_sprite.draw()
 
         #output = f"Centre: {self.vpx}, {self.vpy}"
-        arcade.draw_text(self.dialogue, self.vpx+10, self.vpy+SCREEN_HEIGHT-20, arcade.color.WHITE, 14)
+        arcade.draw_text(self.dialogue, self.vpx+10, self.vpy+10, arcade.color.WHITE, 14)
 
     def on_key_press(self, key, modifiers):
         """Called whenever a key is pressed. """
