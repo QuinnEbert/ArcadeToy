@@ -25,41 +25,22 @@ class MyGame(arcade.Window):
 
     def __init__(self, width, height):
         self.lpy = 0.0
-        """
-        Initializer
-        """
         super().__init__(width, height)
-
-        # Set the working directory (where we expect to find files) to the same
-        # directory this .py file is in. You can leave this out of your own
-        # code, but it is needed to easily run the examples using "python -m"
-        # as mentioned at the top of this program.
         file_path = os.path.dirname(os.path.abspath(__file__))
         os.chdir(file_path)
-
-        # Sprite lists
         self.all_sprites_list = None
         self.coin_list = None
-
-        # Set up the player
         self.score = 0
         self.player_sprite = None
         self.wall_list = None
         self.physics_engine = None
-
         self.mapdata = []
-
-        # Viewport
         self.vpx = 0
         self.vpy = 0
-
         self.cheese = None
-
-        # pygame (holy shit this is stupid...)
         pygame.mixer.init()
         self.footsteps = pygame.mixer.Sound("walking.wav")
         self.ate_cheese = False
-
         self.dialogue = f""
 
     def common_reset(self):
@@ -67,9 +48,12 @@ class MyGame(arcade.Window):
         self.ate_cheese = False
 
     def map01(self):
+        # Reset
         self.common_reset()
+        # Music
         pygame.mixer.music.load("al_toe.ogg")
         pygame.mixer.music.play(loops=-1)
+        # Textures
         self.blocks = {
             10: "NO_BLOCK.jpg",
             11: "brick.jpg",
@@ -80,8 +64,10 @@ class MyGame(arcade.Window):
             52: "carpet.jpg",
             53: "carpet_s.jpg"
         }
+        # Default Position
         self.player_sprite.center_x = 32
         self.player_sprite.center_y = -64
+        # Tiledata
         self.mapdata = [
             [99,99,99,11,11,11,99,99,99,99,99,99,99],
             [11,11,11,11,14,11,11,11,11,11,11,11,11],
@@ -92,29 +78,38 @@ class MyGame(arcade.Window):
             [11,53,51,52,52,52,52,52,52,52,52,52,11],
             [11,11,11,11,11,11,11,11,11,11,11,11,11]
         ]
+        # Build the playfield
         y = 0
         while y < len(self.mapdata):
             x = 0
             while x < len(self.mapdata[y]):
                 block_id = self.mapdata[y][x]
+                # 99 is a no-op block (no sprite)
                 if not block_id == 99:
                     block_name = self.blocks[block_id]
                     wall = arcade.Sprite(block_name, SPRITE_SCALING)
                     wall.center_x = x*32
                     wall.center_y = -(y*32)
                     self.all_sprites_list.append(wall)
+                    # Cheese block, block 10 (blank floor) and blocks >= 50 (styled floor) are not walls
                     if not block_name == CHEESE_BLOCK and not block_id == 10 and not block_id >= 50:
+                        # if it's not
                         self.wall_list.append(wall)
                     else:
+                        # I like cheese
                         if block_name == CHEESE_BLOCK:
-                            print("Wedgie!")
                             self.cheese = wall
                 x += 1
             y += 1
-        self.physics_engine = arcade.PhysicsEngineSimple(self.player_sprite,
-                                                         self.wall_list)
+        # bind the physics engine
+        self.physics_engine = arcade.PhysicsEngineSimple(self.player_sprite, self.wall_list)
+        # setup the background
         arcade.set_background_color(arcade.color.AMAZON)
+        # the player needs to always be the top tile
         self.all_sprites_list.append(self.player_sprite)
+        ##
+        ## LEVEL SCRIPTING
+        ##
 
     def setup(self):
         """ Set up the game and initialize the variables. """
