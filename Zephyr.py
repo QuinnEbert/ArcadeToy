@@ -59,8 +59,7 @@ class MyGame(arcade.Window):
         ##
         sst = (datetime.datetime.now()-self.lst).seconds
         if map == "01":
-            if sst <= 9:
-                self.immobile = True
+            self.immobile = (sst <= 9)
             if sst >= 1 and sst <= 4:
                 self.dialogue = f"Holy hell!  What just happened?"
             elif sst >= 6 and sst <= 9:
