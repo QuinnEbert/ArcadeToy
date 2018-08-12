@@ -41,7 +41,7 @@ class MyGame(arcade.Window):
         self.vpy = 0
         self.cheese = None
         pygame.mixer.init()
-        self.footsteps = pygame.mixer.Sound("walking.wav")
+        self.footsteps = pygame.mixer.Sound("data\\sound\\walking.wav")
         self.ate_cheese = False
         self.dialogue = f""
         self.lst = datetime.datetime.now()
@@ -73,7 +73,7 @@ class MyGame(arcade.Window):
         # Reset
         self.common_reset()
         # Music
-        pygame.mixer.music.load("al_toe.ogg")
+        pygame.mixer.music.load(f"data\\music\\al_toe.ogg")
         pygame.mixer.music.play(loops=-1)
         # Textures
         self.blocks = {
@@ -110,7 +110,7 @@ class MyGame(arcade.Window):
                 # 99 is a no-op block (no sprite)
                 if not block_id == 99:
                     block_name = self.blocks[block_id]
-                    wall = arcade.Sprite(block_name, SPRITE_SCALING)
+                    wall = arcade.Sprite(f"data\\tiles\\{block_name}", SPRITE_SCALING)
                     wall.center_x = x*32
                     wall.center_y = -(y*32)
                     self.all_sprites_list.append(wall)
@@ -142,7 +142,7 @@ class MyGame(arcade.Window):
 
         # Set up the player
         self.score = 0
-        self.player_sprite = arcade.Sprite("tiger.png",
+        self.player_sprite = arcade.Sprite("data\\tiles\\tiger.png",
                                            SPRITE_SCALING)
 
         # Viewport
