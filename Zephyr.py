@@ -60,6 +60,8 @@ class MyGame(arcade.Window):
         self.footsteps = pygame.mixer.Sound("walking.wav")
         self.ate_cheese = False
 
+        self.dialogue = f""
+
     def common_reset(self):
         pygame.mixer.music.stop()
         self.ate_cheese = False
@@ -73,15 +75,21 @@ class MyGame(arcade.Window):
             11: "brick.jpg",
             12: CHEESE_BLOCK,
             13: "rubble.jpg",
-            14: "firepit.jpg"
+            14: "firepit.jpg",
+            51: "carpet_b.jpg",
+            52: "carpet.jpg",
+            53: "carpet_s.jpg"
         }
+        self.player_sprite.center_x = 32
+        self.player_sprite.center_y = -64
         self.mapdata = [
+            [99,99,99,11,11,11,99,99,99,99,99,99,99],
             [11,11,11,11,14,11,11,11,11,11,11,11,11],
-            [11,10,13,13,10,10,10,10,10,10,10,10,12],
-            [11,10,13,10,10,10,10,10,10,10,10,10,11],
-            [11,10,10,10,10,10,10,10,10,10,10,10,11],
-            [11,10,10,10,10,10,10,10,10,10,10,10,11],
-            [11,10,10,10,10,10,10,10,10,10,10,10,11],
+            [11,10,13,13,10,53,51,52,52,52,52,52,12],
+            [11,10,13,10,53,51,52,52,52,52,52,52,11],
+            [11,10,10,53,51,52,52,52,52,52,52,52,11],
+            [11,10,53,51,52,52,52,52,52,52,52,52,11],
+            [11,53,51,52,52,52,52,52,52,52,52,52,11],
             [11,11,11,11,11,11,11,11,11,11,11,11,11]
         ]
         y = 0
@@ -89,17 +97,18 @@ class MyGame(arcade.Window):
             x = 0
             while x < len(self.mapdata[y]):
                 block_id = self.mapdata[y][x]
-                block_name = self.blocks[block_id]
-                wall = arcade.Sprite(block_name, SPRITE_SCALING)
-                wall.center_x = x*32
-                wall.center_y = -(y*32)
-                self.all_sprites_list.append(wall)
-                if not block_name == CHEESE_BLOCK and not block_id == 10 and not block_id >= 50:
-                    self.wall_list.append(wall)
-                else:
-                    if block_name == CHEESE_BLOCK:
-                        print("Wedgie!")
-                        self.cheese = wall
+                if not block_id == 99:
+                    block_name = self.blocks[block_id]
+                    wall = arcade.Sprite(block_name, SPRITE_SCALING)
+                    wall.center_x = x*32
+                    wall.center_y = -(y*32)
+                    self.all_sprites_list.append(wall)
+                    if not block_name == CHEESE_BLOCK and not block_id == 10 and not block_id >= 50:
+                        self.wall_list.append(wall)
+                    else:
+                        if block_name == CHEESE_BLOCK:
+                            print("Wedgie!")
+                            self.cheese = wall
                 x += 1
             y += 1
         self.physics_engine = arcade.PhysicsEngineSimple(self.player_sprite,
@@ -120,8 +129,6 @@ class MyGame(arcade.Window):
         self.score = 0
         self.player_sprite = arcade.Sprite("tiger.png",
                                            SPRITE_SCALING)
-        self.player_sprite.center_x = 32
-        self.player_sprite.center_y = -32
 
         # Viewport
         self.vpx = 0
@@ -148,7 +155,7 @@ class MyGame(arcade.Window):
         #self.player_sprite.draw()
 
         #output = f"Centre: {self.vpx}, {self.vpy}"
-        #arcade.draw_text(output, self.vpx+10, self.vpy+SCREEN_HEIGHT-20, arcade.color.WHITE, 14)
+        arcade.draw_text(self.dialogue, self.vpx+10, self.vpy+SCREEN_HEIGHT-20, arcade.color.WHITE, 14)
 
     def on_key_press(self, key, modifiers):
         """Called whenever a key is pressed. """
